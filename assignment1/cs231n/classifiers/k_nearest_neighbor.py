@@ -5,7 +5,7 @@ from past.builtins import xrange
 
 
 class KNearestNeighbor(object):
-    """ a kNN classifier with L2 distance """
+    """a kNN classifier with L2 distance"""
 
     def __init__(self):
         pass
@@ -78,7 +78,7 @@ class KNearestNeighbor(object):
                 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
                 l2_distance = np.sqrt(np.sum(np.square(X[i] - self.X_train[j])))
-                dists[i,j] = l2_distance
+                dists[i, j] = l2_distance
 
                 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -103,7 +103,7 @@ class KNearestNeighbor(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             l2_distance = np.sqrt(np.sum(np.square(self.X_train - X[i]), axis=1))
-            dists[i,:] = l2_distance
+            dists[i, :] = l2_distance
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -142,11 +142,7 @@ class KNearestNeighbor(object):
         # print(second_term.shape)
         # print(third_term.shape)
 
-        dists = np.sqrt(
-          first_term + 
-          second_term + 
-          third_term
-        )
+        dists = np.sqrt(first_term + second_term + third_term)
 
         # print(dists.shape)
 
@@ -181,7 +177,7 @@ class KNearestNeighbor(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            idx = np.argsort(dists[i,:])[:k]
+            idx = np.argsort(dists[i, :])[:k]
             labels = self.y_train[idx]
             closest_y.extend(labels)
 
