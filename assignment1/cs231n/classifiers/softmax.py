@@ -34,7 +34,44 @@ def softmax_loss_naive(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    num_train = X.shape[0]
+    num_classes = W.shape[1]
+
+    for i in range(num_train):
+        ##############################################
+        #                    LOSS                    #
+        ##############################################
+        # calculate scores for each sample -> shape: (num_classes, )
+        scores = X[i].dot(W)
+        # for numerical stability
+        scores -= scores.max()
+        # exponentiate
+        scores_exp = np.exp(scores)
+        # normalize
+        softmax = scores_exp / scores_exp.sum()
+        # add cross entropies as loss for each true label
+        loss -= np.log(softmax[y[i]])
+
+        ##############################################
+        #                  GRADIENT                  #
+        ##############################################
+        for j in range(num_classes):
+            if j == y[i]:
+                continue
+            # for each incorrect label
+            dW[:, j] += softmax[j] * X[i]
+        # for each true label
+        dW[:, y[i]] -= (1 - softmax[y[i]]) * X[i]
+
+    # average loss
+    loss /= num_train
+    # and regularize
+    loss += reg * np.sum(W * W)
+
+    # average gradient
+    dW /= num_train
+    # add regularization
+    dW += 2 * reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -59,7 +96,37 @@ def softmax_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    num_train = X.shape[0]
+
+    ##############################################
+    #                    LOSS                    #
+    ##############################################
+    # calculate scores for all sample -> shape: (mini_batch, num_classes)
+    scores = X.dot(W)
+    # for numerical stability
+    scores -= scores.max()
+    # exponentiate
+    scores_exp = np.exp(scores)
+    # normalize
+    softmax = scores_exp / scores_exp.sum(axis=1, keepdims=True)
+    # for true labels -> shape: (mini_batch, 1)
+    true_softmax = softmax[range(num_train), y].reshape(-1, 1)
+    # sum cross entropies for true labels as loss
+    loss -= np.log(true_softmax).sum()
+    # average loss
+    loss /= num_train
+    # and regularize
+    loss += reg * np.sum(W * W)
+
+    ##############################################
+    #                  GRADIENT                  #
+    ##############################################
+    softmax[range(num_train), y] -= 1
+    dW = X.T.dot(softmax)
+    # average gradient
+    dW /= num_train
+    # add regularization
+    dW += 2 * reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
