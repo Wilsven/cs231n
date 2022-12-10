@@ -63,14 +63,14 @@ def softmax_loss_naive(W, X, y, reg):
         # for each true label
         dW[:, y[i]] -= (1 - softmax[y[i]]) * X[i]
 
-    # average loss
+    # average over number of training examples
     loss /= num_train
-    # and regularize
+    # add regularization term
     loss += reg * np.sum(W * W)
 
-    # average gradient
+    # average over number of training examples
     dW /= num_train
-    # add regularization
+    # add partial derivative of regularization term
     dW += 2 * reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -113,9 +113,9 @@ def softmax_loss_vectorized(W, X, y, reg):
     true_softmax = softmax[range(num_train), y].reshape(-1, 1)
     # sum cross entropies for true labels as loss
     loss -= np.log(true_softmax).sum()
-    # average loss
+    # average over number of training examples
     loss /= num_train
-    # and regularize
+    # add regularization term
     loss += reg * np.sum(W * W)
 
     ##############################################
@@ -123,9 +123,9 @@ def softmax_loss_vectorized(W, X, y, reg):
     ##############################################
     softmax[range(num_train), y] -= 1
     dW = X.T.dot(softmax)
-    # average gradient
+    # average over number of training examples
     dW /= num_train
-    # add regularization
+    # add partial derivative of regularization term
     dW += 2 * reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
