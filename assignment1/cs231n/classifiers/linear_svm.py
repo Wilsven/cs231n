@@ -96,8 +96,8 @@ def svm_loss_vectorized(W, X, y, reg):
     # print(true_scores.shape)
 
     margins = np.maximum(0, scores - true_scores + 1)
-    margins[range(num_train), y] = 0
-    loss += margins.sum()  # set margins of true labels to 0
+    margins[range(num_train), y] = 0 # set margins of true labels to 0
+    loss += margins.sum() 
 
     # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
