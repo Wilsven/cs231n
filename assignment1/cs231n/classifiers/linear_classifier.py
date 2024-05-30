@@ -67,8 +67,8 @@ class LinearClassifier(object):
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
             idx = np.random.choice(num_train, batch_size)
-            X_batch = X[idx, :]
-            y_batch = y[idx]
+            X_batch = X[idx, :]  # (batch_size, D)
+            y_batch = y[idx]  # (batch_size,)
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -113,7 +113,7 @@ class LinearClassifier(object):
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        y_pred = np.argmax(X.dot(self.W), axis=1)
+        y_pred = np.argmax(X @ self.W, axis=1)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return y_pred

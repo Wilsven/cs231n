@@ -41,15 +41,15 @@ def softmax_loss_naive(W, X, y, reg):
         ##############################################
         #                    LOSS                    #
         ##############################################
-        # calculate scores for each sample -> shape: (num_classes, )
-        scores = X[i].dot(W)
-        # for numerical stability
+        # Calculate scores for each sample
+        scores = X[i].dot(W)  # (D,) @ (D, C) -> (C,)
+        # For numerical stability
         scores -= scores.max()
-        # exponentiate
+        # Exponentiate
         scores_exp = np.exp(scores)
-        # normalize
+        # Normalize
         softmax = scores_exp / scores_exp.sum()
-        # add cross entropies as loss for each true label
+        # Add cross entropies as loss for each true label
         loss -= np.log(softmax[y[i]])
 
         ##############################################
@@ -58,20 +58,19 @@ def softmax_loss_naive(W, X, y, reg):
         for j in range(num_classes):
             if j == y[i]:
                 continue
-            # for each incorrect label
+            # For each incorrect label
             dW[:, j] += softmax[j] * X[i]
-        # for each true label
+        # For each true label
         dW[:, y[i]] -= (1 - softmax[y[i]]) * X[i]
 
-    # average over number of training examples
+    # Average over number of training examples
     loss /= num_train
-    # add regularization term
-    loss += reg * np.sum(W * W)
 
-    # average over number of training examples
-    dW /= num_train
-    # add partial derivative of regularization term
-    dW += 2 * reg * W
+    # Add regularization to the loss
+    loss += reg * np.sum(W**2)
+
+    dW /= num_train  # average over number of training examples
+    dW += 2 * reg * W  # add partial derivative of regularization term
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -86,7 +85,7 @@ def softmax_loss_vectorized(W, X, y, reg):
     """
     # Initialize the loss and gradient to zero.
     loss = 0.0
-    dW = np.zeros_like(W)
+    dW = np.zeros_like(W)  # (D,) @ (D, C) -> (C,)
 
     #############################################################################
     # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
@@ -101,31 +100,32 @@ def softmax_loss_vectorized(W, X, y, reg):
     ##############################################
     #                    LOSS                    #
     ##############################################
-    # calculate scores for all sample -> shape: (mini_batch, num_classes)
-    scores = X.dot(W)
-    # for numerical stability
-    scores -= scores.max()
-    # exponentiate
-    scores_exp = np.exp(scores)
-    # normalize
+    # Calculate scores for all samples
+    scores = X @ W  # (N, D) @ (D, C) -> (N, C)
+    # For numerical stability
+    scores -= np.max(scores, axis=1, keepdims=True)  # (N, C)
+    # Exponentiate
+    scores_exp = np.exp(scores)  # (N, C)
+    # Normalize
     softmax = scores_exp / scores_exp.sum(axis=1, keepdims=True)
-    # for true labels -> shape: (mini_batch, 1)
-    true_softmax = softmax[range(num_train), y].reshape(-1, 1)
-    # sum cross entropies for true labels as loss
+    # For true labels
+    true_softmax = softmax[range(num_train), y].reshape(-1, 1)  # (N, 1)
+    # Sum cross entropies for true labels as loss
     loss -= np.log(true_softmax).sum()
-    # average over number of training examples
+    # Average over number of training examples
     loss /= num_train
-    # add regularization term
-    loss += reg * np.sum(W * W)
+    # Add regularization to the loss
+    loss += reg * np.sum(W**2)
 
     ##############################################
     #                  GRADIENT                  #
     ##############################################
     softmax[range(num_train), y] -= 1
-    dW = X.T.dot(softmax)
-    # average over number of training examples
+    # Calculates gradient for all incorrect and true labels
+    dW = X.T @ softmax  # (D, N) @ (N, C) -> (D, C)
+    # Average over number of training examples
     dW /= num_train
-    # add partial derivative of regularization term
+    # Add partial derivative of regularization term
     dW += 2 * reg * W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****

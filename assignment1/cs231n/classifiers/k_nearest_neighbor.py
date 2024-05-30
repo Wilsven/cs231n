@@ -77,8 +77,7 @@ class KNearestNeighbor(object):
                 #####################################################################
                 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-                l2_distance = np.sqrt(np.sum(np.square(X[i] - self.X_train[j])))
-                dists[i, j] = l2_distance
+                dists[i, j] = np.sqrt(np.sum(np.power(self.X_train[j] - X[i], 2)))
 
                 # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -102,8 +101,7 @@ class KNearestNeighbor(object):
             #######################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            l2_distance = np.sqrt(np.sum(np.square(self.X_train - X[i]), axis=1))
-            dists[i, :] = l2_distance
+            dists[i, :] = np.sqrt(np.sum(np.power(self.X_train - X[i], 2), axis=1))
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         return dists
@@ -133,18 +131,14 @@ class KNearestNeighbor(object):
         #########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        # Note: (a - b)^2 = -2ab + a^2 + b^2
-        first_term = -2 * (X @ self.X_train.T)
-        second_term = np.sum(np.square(X), axis=1, keepdims=True)
-        third_term = np.sum(np.square(self.X_train), axis=1, keepdims=True).T
-
-        # print(first_term.shape)
-        # print(second_term.shape)
-        # print(third_term.shape)
-
-        dists = np.sqrt(first_term + second_term + third_term)
-
-        # print(dists.shape)
+        # Note: np.sqrt((a - b)^2) = np.sqrt(-2ab + a^2 + b^2)
+        # X_train.shape -> (Ntr, D)
+        # X.shape -> (Nte, D)
+        dists = np.sqrt(
+            -2 * (X @ self.X_train.T)  # (Nte, D) @ (D, Ntr) -> (Nte, Ntr)
+            + np.power(X, 2).sum(axis=1, keepdims=True)  # (Nte, 1)
+            + np.power(self.X_train, 2).sum(axis=1, keepdims=True).T  # (1, Ntr)
+        )
 
         # *****END OF YOUR CODE (DO NO DELETE/MODIFY THIS LINE)*****
         return dists

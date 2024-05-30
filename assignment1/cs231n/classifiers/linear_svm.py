@@ -30,11 +30,11 @@ def svm_loss_naive(W, X, y, reg):
     loss = 0.0
     for i in range(num_train):
         scores = X[i].dot(W)
-        correct_class_score = scores[y[i]]
+        true_class_score = scores[y[i]]
         for j in range(num_classes):
             if j == y[i]:
                 continue
-            margin = scores[j] - correct_class_score + 1  # note delta = 1
+            margin = scores[j] - true_class_score + 1  # note delta = 1
             if margin > 0:
                 loss += margin
                 #########################################################
@@ -42,7 +42,7 @@ def svm_loss_naive(W, X, y, reg):
                 #########################################################
 
                 dW[:, j] += X[i]  # update gradient for incorrect label
-                dW[:, y[i]] -= X[i]  # update gradient for correct label
+                dW[:, y[i]] -= X[i]  # update gradient for true label
 
                 #########################################################
                 #                     END OF CHANGE                     #
@@ -89,13 +89,12 @@ def svm_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    num_train = X.shape[0]
+    num_train = X.shape[0]  # N
 
-    scores = X.dot(W)
-    true_scores = scores[range(num_train), y].reshape(-1, 1)  # scores of true labels
-    # print(true_scores.shape)
+    scores = X @ W  # (N, D) @ (D, C) -> (N, C)
+    true_class_scores = scores[range(num_train), y].reshape(-1, 1)  # (N,) -> (N, 1)
 
-    margins = np.maximum(0, scores - true_scores + 1)
+    margins = np.maximum(0, scores - true_class_scores + 1)  # note delta = 1
     margins[range(num_train), y] = 0  # set margins of true labels to 0
     loss += margins.sum()
 
@@ -119,9 +118,9 @@ def svm_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    mask = (margins > 0).astype(int)
-    mask[range(num_train), y] -= mask.sum(axis=1)
-    dW = X.T.dot(mask)
+    dW = (margins > 0).astype(int)
+    dW[range(num_train), y] -= dW.sum(axis=1)  # update gradient for true labels
+    dW = X.T @ dW  # update gradient for incorrect labels
     dW /= num_train  # average over number of training examples
     dW += 2 * reg * W  # add partial derivative of regularization term
 

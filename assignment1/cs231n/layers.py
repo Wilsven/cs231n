@@ -27,7 +27,10 @@ def affine_forward(x, w, b):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    batch_size = x.shape[0]
+    x_reshaped = x.reshape(batch_size, -1)  # (N, d_1, ..., d_k) -> (N, D)
+
+    out = x_reshaped @ w + b  # (N, D) @ (D, M) + (M,) -> (N, M)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -60,7 +63,13 @@ def affine_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    batch_size = x.shape[0]
+    x_reshaped = x.reshape(batch_size, -1)  # (N, d_1, ..., d_k) -> (N, D)
+
+    # (N, M) @ (M, D) -> (N, D) -> (N, d1, ..., d_k)
+    dx = (dout @ w.T).reshape(batch_size, *x.shape[1:])
+    dw = x_reshaped.T @ dout  # (D, N) @ (N, M) -> (D, M)
+    db = dout.sum(axis=0)  # (N, M) -> (M,)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -86,7 +95,7 @@ def relu_forward(x):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    out = np.maximum(0, x)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -113,7 +122,7 @@ def relu_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    dx = dout * (x > 0)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -772,7 +781,22 @@ def svm_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    num_samples = x.shape[0]
+
+    x_true = x[range(num_samples), y].reshape(-1, 1)  # scores for true labels
+
+    margins = np.maximum(0, x - x_true + 1)  # margin for each score
+    margins[range(num_samples), y] = 0  # set margins of true labels to 0
+    loss = margins.sum()
+
+    # Average over number of examples
+    loss /= num_samples
+
+    dx = (margins > 0).astype(float)
+    dx[range(num_samples), y] -= dx.sum(axis=1)
+
+    # Average over number of examples
+    dx /= num_samples
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -802,7 +826,20 @@ def softmax_loss(x, y):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    num_samples = x.shape[0]
+
+    scores_exp = np.exp(x - x.max(axis=1, keepdims=True))
+    softmax = scores_exp / scores_exp.sum(axis=1, keepdims=True)
+    true_softmax = softmax[range(num_samples), y]
+    loss = -np.log(true_softmax).sum()
+
+    # Average over number of training examples
+    loss /= num_samples
+
+    softmax[range(num_samples), y] -= 1
+
+    # Average over number of training examples
+    dx = softmax / num_samples
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
